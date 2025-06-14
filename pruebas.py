@@ -1,8 +1,9 @@
 """Simple Pong game using tkinter.
 
 Controls:
-- Player (left paddle) moves with 'w' (up) and 's' (down).
-- The right paddle is controlled by a simple AI.
+    - Player (left paddle) moves with 'w' (up) and 's' (down).
+    - The right paddle is controlled by a simple AI.
+    - Click the *Pause* button to pause/resume the game.
 
 Run this file with Python to start the game.
 """
@@ -27,6 +28,9 @@ class PongGame:
         self.master = master
         self.canvas = tk.Canvas(master, width=WIDTH, height=HEIGHT, bg="black")
         self.canvas.pack()
+        self.pause_button = tk.Button(master, text="Pause", command=self.toggle_pause)
+        self.pause_button.pack()
+        self.paused = False
 
         # Initialize paddles and ball
         self.player_y = HEIGHT // 2 - PADDLE_HEIGHT // 2
@@ -41,6 +45,7 @@ class PongGame:
 
         # Key press state
         self.pressed_keys = set()
+
 
         # Draw initial objects
         self.draw_objects()
@@ -98,6 +103,11 @@ class PongGame:
     def on_key_release(self, event: tk.Event) -> None:
         self.pressed_keys.discard(event.keysym.lower())
 
+    def toggle_pause(self) -> None:
+        """Toggle the pause state of the game."""
+        self.paused = not self.paused
+        self.pause_button.config(text="Resume" if self.paused else "Pause")
+
     def move_player(self) -> None:
         if "w" in self.pressed_keys and self.player_y > 0:
             self.player_y -= PADDLE_SPEED
@@ -151,9 +161,10 @@ class PongGame:
         self.update_scoreboard()
 
     def game_loop(self) -> None:
-        self.move_player()
-        self.move_ai()
-        self.move_ball()
+        if not self.paused:
+            self.move_player()
+            self.move_ai()
+            self.move_ball()
         self.draw_objects()
         self.update_scoreboard()
         self.master.after(16, self.game_loop)  # Roughly 60 FPS
